@@ -17,11 +17,14 @@ RUN:
 4. Open:
    http://localhost:3001
 
-LOGIN:
-Username: admin
-Password: admin123
+ACCOUNT SETUP:
+1. Open http://localhost:3001/register.
+2. Create an account, then log in with that username and password.
+3. Registered accounts are kept in memory and are cleared when the server restarts.
 
 ROUTES:
+GET  /register
+POST /register
 GET  /login
 POST /login
 GET  /dashboard       Protected Route 1

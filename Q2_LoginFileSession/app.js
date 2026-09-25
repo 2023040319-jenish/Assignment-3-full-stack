@@ -14,7 +14,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use(session({
     store: new FileStore({
-        path: "./sessions",
+        path: path.join(__dirname, "sessions"),
         retries: 1
     }),
     secret: "college-assignment-secret-key",
@@ -25,10 +25,8 @@ app.use(session({
     }
 }));
 
-const USER = {
-    username: "admin",
-    password: "admin123"
-};
+// Accounts are kept in memory for this assignment and reset when the server restarts.
+const users = [];
 
 function isAuthenticated(req, res, next) {
     if (req.session.isLoggedIn) {
@@ -46,23 +44,66 @@ app.get("/", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-    res.render("login", {
-        error: null
-    });
-});
-
-app.post("/login", (req, res) => {
-    const { username, password } = req.body;
-
-    if (username === USER.username && password === USER.password) {
-        req.session.isLoggedIn = true;
-        req.session.username = username;
-
+    if (req.session.isLoggedIn) {
         return res.redirect("/dashboard");
     }
 
+    res.render("login", {
+        error: null,
+        registered: req.query.registered === "1"
+    });
+});
+
+app.get("/register", (req, res) => {
+    if (req.session.isLoggedIn) {
+        return res.redirect("/dashboard");
+    }
+
+    res.render("register", { error: null });
+});
+
+app.post("/register", (req, res) => {
+    const username = typeof req.body.username === "string" ? req.body.username.trim() : "";
+    const password = typeof req.body.password === "string" ? req.body.password : "";
+
+    if (!username || !password) {
+        return res.status(400).render("register", {
+            error: "Username and password are required."
+        });
+    }
+
+    if (users.some(user => user.username.toLowerCase() === username.toLowerCase())) {
+        return res.status(409).render("register", {
+            error: "That username is already registered."
+        });
+    }
+
+    users.push({ username, password });
+    res.redirect("/login?registered=1");
+});
+
+app.post("/login", (req, res) => {
+    const username = typeof req.body.username === "string" ? req.body.username.trim() : "";
+    const password = typeof req.body.password === "string" ? req.body.password : "";
+    const user = users.find(account =>
+        account.username.toLowerCase() === username.toLowerCase() && account.password === password
+    );
+
+    if (user) {
+        return req.session.regenerate(err => {
+            if (err) {
+                return res.status(500).send("Could not start a session.");
+            }
+
+            req.session.isLoggedIn = true;
+            req.session.username = user.username;
+            res.redirect("/dashboard");
+        });
+    }
+
     res.status(401).render("login", {
-        error: "Invalid username or password."
+        error: "Invalid username or password.",
+        registered: false
     });
 });
 

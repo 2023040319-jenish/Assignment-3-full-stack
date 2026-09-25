@@ -45,6 +45,13 @@ button {
     border: 1px solid #e00;
 }
 
+.success {
+    background: #e5f7e9;
+    color: #176b2c;
+    padding: 10px;
+    border: 1px solid #35a853;
+}
+
 .hint {
     margin-top: 25px;
     background: #eee;

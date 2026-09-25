@@ -9,6 +9,10 @@
 <div class="box">
     <h1>Login</h1>
 
+    <% if (registered) { %>
+        <div class="success">Registration successful. You can now log in.</div>
+    <% } %>
+
     <% if (error) { %>
         <div class="error"><%= error %></div>
     <% } %>
@@ -23,10 +27,7 @@
         <button type="submit">Login</button>
     </form>
 
-    <p class="hint">
-        Username: <b>admin</b><br>
-        Password: <b>admin123</b>
-    </p>
+    <p>Don't have an account? <a href="/register">Register here</a>.</p>
 </div>
 </body>
 </html>
