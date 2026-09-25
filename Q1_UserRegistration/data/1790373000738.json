@@ -1,0 +1,21 @@
+{
+  "username": "jenish15",
+  "email": "jenish@gmail.com",
+  "gender": "Male",
+  "hobbies": [
+    "Reading"
+  ],
+  "profilePic": {
+    "originalName": "Screenshot 2026-09-26 031141.png",
+    "fileName": "1790373000734-Screenshot_2026-09-26_031141.png",
+    "url": "/uploads/profile/1790373000734-Screenshot_2026-09-26_031141.png"
+  },
+  "otherPics": [
+    {
+      "originalName": "Screenshot 2026-09-26 031141.png",
+      "fileName": "1790373000735-Screenshot_2026-09-26_031141.png",
+      "url": "/uploads/other/1790373000735-Screenshot_2026-09-26_031141.png"
+    }
+  ],
+  "submittedAt": "26/9/2026, 3:20:00 am"
+}

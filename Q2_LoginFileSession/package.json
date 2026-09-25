@@ -1,0 +1,16 @@
+{
+  "name": "q2-login-file-session",
+  "version": "1.0.0",
+  "description": "Express login application using file session store",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "node app.js"
+  },
+  "dependencies": {
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "express-session": "^1.18.2",
+    "session-file-store": "^1.5.0"
+  }
+}

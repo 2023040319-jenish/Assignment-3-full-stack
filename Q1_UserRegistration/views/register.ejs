@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>User Registration</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<main class="container">
+    <header class="page-heading">
+        <p class="eyebrow">GET STARTED</p>
+        <h1>Create your account</h1>
+        <p class="intro">Fill in your details and add a profile photo to complete registration.</p>
+    </header>
+
+    <div class="error-box" id="client-error-box" role="alert" aria-live="polite" hidden>
+        <h2>Please correct the following</h2>
+        <ul id="client-error-list"></ul>
+    </div>
+
+    <% if (errors.length > 0) { %>
+        <div class="error-box" role="alert" aria-live="polite">
+            <h2>Please correct the following</h2>
+            <ul>
+                <% errors.forEach(error => { %>
+                    <li><%= error.msg %></li>
+                <% }) %>
+            </ul>
+        </div>
+    <% } %>
+
+    <form id="registration-form" action="/register" method="POST" enctype="multipart/form-data" novalidate>
+        <div class="form-grid">
+            <div class="field">
+                <label for="username">Username</label>
+                <input id="username" type="text" name="username" value="<%= values.username %>" autocomplete="username">
+            </div>
+
+            <div class="field">
+                <label for="email">Email address</label>
+                <input id="email" type="email" name="email" value="<%= values.email %>" autocomplete="email">
+            </div>
+
+            <div class="field">
+                <label for="password">Password</label>
+                <input id="password" type="password" name="password" value="<%= values.password %>" autocomplete="new-password">
+            </div>
+
+            <div class="field">
+                <label for="confirmPassword">Confirm password</label>
+                <input id="confirmPassword" type="password" name="confirmPassword" value="<%= values.confirmPassword %>" autocomplete="new-password">
+            </div>
+        </div>
+
+        <fieldset class="choice-group">
+            <legend>Gender</legend>
+            <div class="options">
+                <% ["Male", "Female", "Other"].forEach(gender => { %>
+                    <label class="choice">
+                        <input type="radio" name="gender" value="<%= gender %>"
+                            <%= values.gender === gender ? "checked" : "" %>>
+                        <span><%= gender %></span>
+                    </label>
+                <% }) %>
+            </div>
+        </fieldset>
+
+        <fieldset class="choice-group">
+            <legend>Hobbies</legend>
+            <div class="options">
+                <% ["Reading", "Music", "Sports", "Travel"].forEach(hobby => { %>
+                    <label class="choice">
+                        <input type="checkbox" name="hobbies" value="<%= hobby %>"
+                            <%= values.hobbies.includes(hobby) ? "checked" : "" %>>
+                        <span><%= hobby %></span>
+                    </label>
+                <% }) %>
+            </div>
+        </fieldset>
+
+        <div class="upload-grid">
+            <div class="field">
+                <label for="profilePic">Profile picture <span class="label-detail">(1 required)</span></label>
+                <input id="profilePic" type="file" name="profilePic" accept=".jpg,.jpeg,.png,.gif,image/jpeg,image/png,image/gif">
+            </div>
+
+            <div class="field">
+                <label for="otherPics">Other pictures <span class="label-detail">(1–5 required)</span></label>
+                <input id="otherPics" type="file" name="otherPics" accept=".jpg,.jpeg,.png,.gif,image/jpeg,image/png,image/gif" multiple>
+            </div>
+        </div>
+
+        <p class="note">Images: JPG, JPEG, PNG or GIF · Maximum 2 MB each. Browsers do not allow file selections to be restored after a failed submission.</p>
+        <button type="submit">Complete registration <span aria-hidden="true">→</span></button>
+    </form>
+</main>
+<script>
+    const registrationForm = document.getElementById("registration-form");
+    const clientErrorBox = document.getElementById("client-error-box");
+    const clientErrorList = document.getElementById("client-error-list");
+    const maxImageBytes = 2 * 1024 * 1024;
+    const acceptedExtensions = /\.(jpe?g|png|gif)$/i;
+    const acceptedTypes = new Set(["image/jpeg", "image/png", "image/gif"]);
+
+    registrationForm.addEventListener("submit", event => {
+        const errors = [];
+        const markInvalid = (element, message) => {
+            element.setAttribute("aria-invalid", "true");
+            errors.push({ element, message });
+        };
+
+        registrationForm.querySelectorAll("[aria-invalid]").forEach(element => {
+            element.removeAttribute("aria-invalid");
+        });
+
+        const username = document.getElementById("username");
+        const email = document.getElementById("email");
+        const password = document.getElementById("password");
+        const confirmPassword = document.getElementById("confirmPassword");
+        const gender = registrationForm.querySelector('input[name="gender"]:checked');
+        const hobbies = registrationForm.querySelectorAll('input[name="hobbies"]:checked');
+        const profilePic = document.getElementById("profilePic");
+        const otherPics = document.getElementById("otherPics");
+
+        if (username.value.trim().length < 3 || username.value.trim().length > 30) {
+            markInvalid(username, "Username must be 3 to 30 characters.");
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) {
+            markInvalid(email, "Enter a valid email address.");
+        }
+        if (password.value.length < 6) {
+            markInvalid(password, "Password must be at least 6 characters.");
+        }
+        if (confirmPassword.value !== password.value) {
+            markInvalid(confirmPassword, "Passwords do not match.");
+        }
+        if (!gender) {
+            markInvalid(registrationForm.querySelector('input[name="gender"]'), "Please select a gender.");
+        }
+        if (hobbies.length === 0) {
+            markInvalid(registrationForm.querySelector('input[name="hobbies"]'), "Select at least one hobby.");
+        }
+        if (profilePic.files.length !== 1) {
+            markInvalid(profilePic, "Choose one profile picture.");
+        }
+        if (otherPics.files.length < 1 || otherPics.files.length > 5) {
+            markInvalid(otherPics, "Choose between one and five other pictures.");
+        }
+
+        [profilePic, otherPics].forEach(input => {
+            Array.from(input.files).forEach(file => {
+                if (!acceptedExtensions.test(file.name) || !acceptedTypes.has(file.type.toLowerCase())) {
+                    markInvalid(input, `${file.name} is not a supported JPG, JPEG, PNG or GIF image.`);
+                } else if (file.size > maxImageBytes) {
+                    markInvalid(input, `${file.name} is larger than 2 MB.`);
+                }
+            });
+        });
+
+        clientErrorList.replaceChildren();
+        if (errors.length > 0) {
+            event.preventDefault();
+            errors.forEach(({ message }) => {
+                const item = document.createElement("li");
+                item.textContent = message;
+                clientErrorList.appendChild(item);
+            });
+            clientErrorBox.hidden = false;
+            clientErrorBox.scrollIntoView({ behavior: "smooth", block: "center" });
+            errors[0].element.focus({ preventScroll: true });
+        } else {
+            clientErrorBox.hidden = true;
+        }
+    });
+</script>
+</body>
+</html>
